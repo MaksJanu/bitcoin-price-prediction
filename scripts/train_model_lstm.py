@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import json
 import warnings
+import joblib
 warnings.filterwarnings('ignore')
 
 # Sprawdź importy
@@ -289,60 +290,247 @@ def main():
     except Exception as e:
         print(f"⚠️ Warning: Could not save training curves: {e}")
 
-    # 7. Predykcje przyszłości
-    print("\n🔮 Step 7: Future predictions...")
+    # 7. Predykcja na następny dzień z ostatnich 60 dni (MAIN ADDITION)
+    print("\n🔮 Step 7: Next Day Price Prediction...")
     try:
-        # Get last sequence and reshape it properly
-        last_sequence = X_test[-1:].copy() if len(X_test) > 0 else X_train[-1:].copy()
-        print(f"Last sequence shape: {last_sequence.shape}")
+        # Ładowanie scalera do denormalizacji
+        scaler = None
+        try:
+            scaler = joblib.load('data/processed_data/scaler.joblib')
+            print("✅ Scaler loaded successfully")
+        except:
+            print("⚠️ Warning: Could not load scaler - predictions will be normalized")
         
-        # Make sure we have the right dimensions [1, sequence_length, n_features]
-        if last_sequence.shape[0] > 0:
-            # Number of days to predict
+        # Pobierz ostatnie 60 dni danych
+        df_sorted = df.sort_values('Date').reset_index(drop=True)
+        last_60_days = df_sorted.tail(SEQUENCE_LENGTH)
+        
+        print(f"Using last {len(last_60_days)} days for prediction:")
+        if 'Date' in last_60_days.columns:
+            print(f"Date range: {last_60_days['Date'].iloc[0]} to {last_60_days['Date'].iloc[-1]}")
+        
+        # Przygotuj dane wejściowe
+        feature_data = last_60_days[feature_columns].values
+        
+        # Reshape do formatu [1, sequence_length, n_features]
+        X_next = feature_data.reshape(1, SEQUENCE_LENGTH, len(feature_columns))
+        
+        print(f"Input sequence shape: {X_next.shape}")
+        
+        # Wykonaj predykcję
+        next_day_prediction_normalized = model.predict(X_next)[0][0]
+        
+        print(f"\n🎯 NEXT DAY PRICE PREDICTION:")
+        print("=" * 50)
+        
+        if scaler is not None:
+            try:
+                # Denormalizuj predykcję
+                # Stwórz dummy array z wszystkimi cechami
+                dummy_data = np.zeros((1, len(scaler.feature_names_in_)))
+                
+                # Znajdź indeks kolumny Price w scalerze
+                price_idx = list(scaler.feature_names_in_).index(target_column)
+                dummy_data[0, price_idx] = next_day_prediction_normalized
+                
+                # Denormalizuj
+                denormalized = scaler.inverse_transform(dummy_data)
+                next_day_prediction_actual = denormalized[0, price_idx]
+                
+                print(f"🚀 Predicted Bitcoin Price for Next Day: ${next_day_prediction_actual:.2f}")
+                print(f"   (Normalized value: {next_day_prediction_normalized:.6f})")
+                
+                # Pokaż ostatnią rzeczywistą cenę dla porównania
+                if scaler is not None and target_column in df_sorted.columns:
+                    last_price_normalized = df_sorted[target_column].iloc[-1]
+                    dummy_last = np.zeros((1, len(scaler.feature_names_in_)))
+                    dummy_last[0, price_idx] = last_price_normalized
+                    last_price_actual = scaler.inverse_transform(dummy_last)[0, price_idx]
+                    
+                    price_change = next_day_prediction_actual - last_price_actual
+                    price_change_pct = (price_change / last_price_actual) * 100
+                    
+                    print(f"📊 Last Known Price: ${last_price_actual:.2f}")
+                    print(f"📈 Predicted Change: ${price_change:.2f} ({price_change_pct:+.2f}%)")
+                    
+                    if price_change > 0:
+                        print("📈 Trend: BULLISH (Price expected to rise)")
+                    else:
+                        print("📉 Trend: BEARISH (Price expected to fall)")
+                        
+            except Exception as denorm_error:
+                print(f"⚠️ Could not denormalize prediction: {denorm_error}")
+                print(f"🚀 Predicted Bitcoin Price (Normalized): {next_day_prediction_normalized:.6f}")
+        else:
+            print(f"🚀 Predicted Bitcoin Price (Normalized): {next_day_prediction_normalized:.6f}")
+        
+        print("=" * 50)
+        
+        # Dodatkowe informacje o pewności predykcji
+        print(f"\n🔍 Prediction Details:")
+        print(f"  Model R² Score: {test_metrics['r2']:.4f}")
+        print(f"  Model MAE: {test_metrics['mae']:.6f}")
+        print(f"  Sequence Length Used: {SEQUENCE_LENGTH} days")
+        print(f"  Features Used: {len(feature_columns)}")
+        
+        confidence_level = "High" if test_metrics['r2'] > 0.8 else "Medium" if test_metrics['r2'] > 0.6 else "Low"
+        print(f"  Prediction Confidence: {confidence_level}")
+        
+    except Exception as e:
+        print(f"❌ Error making next day prediction: {e}")
+        import traceback
+        traceback.print_exc()
+
+    # 8. Predykcje przyszłości (Extended) - POPRAWIONE
+    print("\n🔮 Step 8: Extended Future predictions...")
+    try:
+        # Użyj funkcji z prediction_utils jeśli dostępna
+        try:
+            # Spróbuj użyć istniejącej funkcji
+            last_sequence = X_test[-1] if len(X_test) > 0 else X_train[-1]
+            future_predictions = predict_future(model, last_sequence, days_ahead=30)
+            
+            print(f"Generated {len(future_predictions)} future predictions using predict_future function")
+            
+            # Sprawdź czy predykcje są rozsądne
+            if len(future_predictions) > 0:
+                first_pred = future_predictions[0]
+                last_actual = df_sorted[target_column].iloc[-1]
+                change = abs(first_pred - last_actual)
+                
+                print(f"Last actual price (normalized): {last_actual:.4f}")
+                print(f"First prediction: {first_pred:.4f}")
+                print(f"Change: {change:.4f} ({((first_pred - last_actual) / last_actual * 100):+.2f}%)")
+                
+                if change > 0.1:  # Jeśli zmiana > 10%
+                    print(f"⚠️ WARNING: Large prediction jump detected!")
+                    print("  Using alternative prediction method...")
+                    raise Exception("Large jump - using alternative method")
+            
+        except Exception as predict_error:
+            print(f"Standard prediction failed: {predict_error}")
+            print("Using improved rolling prediction method...")
+            
+            # POPRAWIONA METODA - używamy rzeczywistych danych historycznych
+            # Pobierz więcej danych historycznych niż potrzeba
+            extended_data = df_sorted.tail(SEQUENCE_LENGTH + 30)  # 90 dni
+            
+            if len(extended_data) < SEQUENCE_LENGTH + 10:
+                print("❌ Not enough historical data for extended predictions")
+                return
+            
+            future_predictions = []
             days_ahead = 30
             
-            # Simple future prediction approach
-            future_values = []
-            current_sequence = last_sequence.copy()
-            
-            for _ in range(days_ahead):
-                # Predict next value
-                next_pred = model.predict(current_sequence)[0][0]
-                future_values.append(next_pred)
+            # Dla każdego dnia predykcji, użyj rzeczywistych danych historycznych
+            for day in range(days_ahead):
+                # Pobierz sekwencję z przesunięciem czasowym
+                start_idx = day  # Przesunięcie o 'day' dni
+                end_idx = start_idx + SEQUENCE_LENGTH
                 
-                # Update sequence for next prediction (roll the window)
-                # Remove oldest day, add new prediction
-                if current_sequence.shape[1] > 1:  # If sequence length > 1
-                    # Shift the sequence left
-                    current_sequence[0, :-1, :] = current_sequence[0, 1:, :]
-                    # Set the last entry's target feature as our prediction
-                    # Assume the target is the first feature (adjust if different)
-                    current_sequence[0, -1, 0] = next_pred
+                if end_idx > len(extended_data):
+                    # Jeśli nie mamy wystarczająco danych, użyj ostatnich dostępnych
+                    sequence_data = extended_data.tail(SEQUENCE_LENGTH)
+                else:
+                    sequence_data = extended_data.iloc[start_idx:end_idx]
+                
+                # Przygotuj sekwencję
+                feature_data = sequence_data[feature_columns].values
+                current_sequence = feature_data.reshape(1, SEQUENCE_LENGTH, len(feature_columns))
+                
+                # Wykonaj predykcję
+                pred = model.predict(current_sequence)[0][0]
+                future_predictions.append(pred)
+                
+                print(f"Day {day+1} prediction: {pred:.4f}")
             
-            print(f"Generated {len(future_values)} future predictions")
+            print(f"Generated {len(future_predictions)} future predictions using rolling historical data")
+        
+        # Analiza wyników
+        if len(future_predictions) > 0:
+            last_actual = df_sorted[target_column].iloc[-1]
+            first_pred = future_predictions[0]
             
-            # Visualization if available
-            if VISUALIZATION_AVAILABLE:
-                try:
-                    create_future_predictions_plot(y_test, future_values, 
-                                                test_metrics['mae'], 
-                                                days_ahead)
-                    print("✅ Future predictions plot created successfully")
-                except Exception as viz_err:
-                    print(f"⚠️ Could not create visualization: {viz_err}")
+            print(f"\n📊 Prediction Analysis:")
+            print(f"  Last actual price: {last_actual:.4f}")
+            print(f"  First prediction: {first_pred:.4f}")
+            print(f"  Day 1 change: {((first_pred - last_actual) / last_actual * 100):+.2f}%")
+            
+            # Sprawdź trend
+            if len(future_predictions) >= 5:
+                trend_start = np.mean(future_predictions[:5])
+                trend_end = np.mean(future_predictions[-5:])
+                trend_change = ((trend_end - trend_start) / trend_start) * 100
+                
+                print(f"  First 5 days average: {trend_start:.4f}")
+                print(f"  Last 5 days average: {trend_end:.4f}")
+                print(f"  Overall trend: {trend_change:+.2f}%")
+            
+            # Sprawdź volatility
+            volatility = np.std(future_predictions)
+            print(f"  Prediction volatility (std): {volatility:.4f}")
+            
+            # Validation check
+            if abs((first_pred - last_actual) / last_actual) > 0.2:  # 20% change
+                print("⚠️ WARNING: Unrealistic first day prediction!")
+                print("  Consider using single-day prediction instead")
+            else:
+                print("✅ Predictions appear realistic")
+        
+        # Visualization
+        if VISUALIZATION_AVAILABLE and len(future_predictions) > 0:
+            try:
+                y_test_last = y_test[-30:] if len(y_test) >= 30 else y_test
+                create_future_predictions_plot(
+                    y_test_last, 
+                    future_predictions, 
+                    test_metrics['mae'], 
+                    len(future_predictions)
+                )
+                print("✅ Future predictions plot created successfully")
+            except Exception as viz_err:
+                print(f"⚠️ Could not create visualization: {viz_err}")
+        
+        # Print results with denormalization
+        if len(future_predictions) > 0:
+            print(f"\n📈 Extended future price predictions (next 10 days):")
+            print("-" * 60)
+            
+            for i, val in enumerate(future_predictions[:10]):
+                if scaler is not None:
+                    try:
+                        # Denormalizuj
+                        dummy_data = np.zeros((1, len(scaler.feature_names_in_)))
+                        price_idx = list(scaler.feature_names_in_).index(target_column)
+                        dummy_data[0, price_idx] = val
+                        denormalized = scaler.inverse_transform(dummy_data)
+                        actual_price = denormalized[0, price_idx]
+                        
+                        # Oblicz zmianę względem ostatniego dnia
+                        if i == 0:
+                            base_price = last_actual
+                            if scaler is not None:
+                                dummy_base = np.zeros((1, len(scaler.feature_names_in_)))
+                                dummy_base[0, price_idx] = base_price
+                                base_actual = scaler.inverse_transform(dummy_base)[0, price_idx]
+                            else:
+                                base_actual = base_price
+                        
+                        change_pct = ((actual_price - base_actual) / base_actual * 100)
+                        print(f"Day {i+1:2d}: ${actual_price:8.2f} ({change_pct:+5.1f}%) [norm: {val:.4f}]")
+                        
+                    except Exception as denorm_err:
+                        print(f"Day {i+1:2d}: {val:.4f} (normalized) - denorm error")
+                else:
+                    print(f"Day {i+1:2d}: {val:.4f} (normalized)")
                     
-            # Print the first few predictions
-            print("\nFuture price predictions (next 10 days):")
-            for i, val in enumerate(future_values[:10]):
-                print(f"Day {i+1}: {val:.4f}")
-        else:
-            print("❌ No data available for future predictions")
-            
     except Exception as e:
-        print(f"⚠️ Warning: Could not create future predictions: {e}")
+        print(f"⚠️ Warning: Could not create extended future predictions: {e}")
+        import traceback
+        traceback.print_exc()
 
-    # 8. Ocena jakości modelu
-    print("\n🎯 Step 8: Model quality assessment...")
+    # 9. Ocena jakości modelu
+    print("\n🎯 Step 9: Model quality assessment...")
     try:
         # Create a quality assessment dictionary directly
         r2 = test_metrics['r2']
@@ -362,8 +550,8 @@ def main():
     except Exception as e:
         print(f"⚠️ Warning: Could not assess model quality: {e}")
 
-    # 9. Zapisanie modelu i wyników
-    print("\n💾 Step 9: Saving results...")
+    # 10. Zapisanie modelu i wyników
+    print("\n💾 Step 10: Saving results...")
     try:
         # Zapisz model
         model.save_model('saved_models/bitcoin_lstm_model_optimized.h5')
