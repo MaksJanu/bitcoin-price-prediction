@@ -28,7 +28,7 @@ def predict_future(model, last_sequence, days_ahead=7):
     
     for _ in range(days_ahead):
         # Predykcja następnego dnia
-        next_pred = model.predict(current_sequence.reshape(1, *current_sequence.shape), verbose=0)
+        next_pred = model.predict(current_sequence.reshape(1, *current_sequence.shape))
         predictions.append(next_pred[0, 0])
         
         # Aktualizuj sekwencję (prosty sposób - kopiuj ostatni wiersz)

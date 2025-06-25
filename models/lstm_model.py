@@ -76,7 +76,7 @@ class BitcoinLSTMModel:
         print("✅ Model LSTM został utworzony pomyślnie!")
         return self.model
     
-    def train(self, X_train, y_train, validation_split=0.2, epochs=100, 
+    def train(self, X_train, y_train, validation_split=0.2, epochs=30, 
               batch_size=16, patience=30, min_lr=1e-6):
         """
         Trenuje model z zoptymalizowanymi callbackami

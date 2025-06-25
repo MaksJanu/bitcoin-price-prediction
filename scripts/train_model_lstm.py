@@ -52,7 +52,7 @@ def main():
     # Parametry treningu - zoptymalizowane dla dokładności
     SEQUENCE_LENGTH = 60
     PREDICTION_HORIZON = 1
-    EPOCHS = 100  # Zwiększone dla lepszej dokładności
+    EPOCHS = 30  # Zwiększone dla lepszej dokładności
     BATCH_SIZE = 16  # Zmniejszone dla stabilniejszego trenowania
     PATIENCE = 30  # Zwiększone patience dla EarlyStopping
     
@@ -292,35 +292,67 @@ def main():
     # 7. Predykcje przyszłości
     print("\n🔮 Step 7: Future predictions...")
     try:
-        # Pobierz ostatnią sekwencję do predykcji
-        last_sequence = X_test[-1:] if len(X_test) > 0 else X_train[-1:]
+        # Get last sequence and reshape it properly
+        last_sequence = X_test[-1:].copy() if len(X_test) > 0 else X_train[-1:].copy()
+        print(f"Last sequence shape: {last_sequence.shape}")
         
-        # Przewiduj przyszłe wartości
-        print("Generating future predictions...")
-        future_predictions = predict_future(model, last_sequence, days_ahead=30)
-        
-        # Wykresy predykcji przyszłości
-        if VISUALIZATION_AVAILABLE:
-            print("Creating future predictions plot...")
-            create_future_predictions_plot(df, future_predictions, target_column)
+        # Make sure we have the right dimensions [1, sequence_length, n_features]
+        if last_sequence.shape[0] > 0:
+            # Number of days to predict
+            days_ahead = 30
             
-            # Wydrukuj predykcje
-            print_future_predictions(future_predictions)
+            # Simple future prediction approach
+            future_values = []
+            current_sequence = last_sequence.copy()
+            
+            for _ in range(days_ahead):
+                # Predict next value
+                next_pred = model.predict(current_sequence)[0][0]
+                future_values.append(next_pred)
+                
+                # Update sequence for next prediction (roll the window)
+                # Remove oldest day, add new prediction
+                if current_sequence.shape[1] > 1:  # If sequence length > 1
+                    # Shift the sequence left
+                    current_sequence[0, :-1, :] = current_sequence[0, 1:, :]
+                    # Set the last entry's target feature as our prediction
+                    # Assume the target is the first feature (adjust if different)
+                    current_sequence[0, -1, 0] = next_pred
+            
+            print(f"Generated {len(future_values)} future predictions")
+            
+            # Visualization if available
+            if VISUALIZATION_AVAILABLE:
+                try:
+                    create_future_predictions_plot(y_test, future_values, 
+                                                test_metrics['mae'], 
+                                                days_ahead)
+                    print("✅ Future predictions plot created successfully")
+                except Exception as viz_err:
+                    print(f"⚠️ Could not create visualization: {viz_err}")
+                    
+            # Print the first few predictions
+            print("\nFuture price predictions (next 10 days):")
+            for i, val in enumerate(future_values[:10]):
+                print(f"Day {i+1}: {val:.4f}")
         else:
-            # Wydrukuj tylko pierwszych kilka predykcji
-            print("Future predictions (first 10 days):")
-            for i, pred in enumerate(future_predictions[:10]):
-                print(f"Day {i+1}: ${pred:.2f}")
-        
-        print("✅ Future predictions completed!")
-        
+            print("❌ No data available for future predictions")
+            
     except Exception as e:
         print(f"⚠️ Warning: Could not create future predictions: {e}")
 
     # 8. Ocena jakości modelu
     print("\n🎯 Step 8: Model quality assessment...")
     try:
-        quality_assessment = assess_model_quality(test_metrics, y_test, y_test_pred)
+        # Create a quality assessment dictionary directly
+        r2 = test_metrics['r2']
+        quality_assessment = {
+            'Model Quality': 'Excellent' if r2 > 0.8 else 'Good' if r2 > 0.6 else 'Moderate' if r2 > 0.4 else 'Poor',
+            'R² Score': f"{r2:.4f}",
+            'MSE': f"{test_metrics['mse']:.6f}",
+            'MAE': f"{test_metrics['mae']:.6f}",
+            'Recommended Action': 'None needed' if r2 > 0.7 else 'Consider more data or feature engineering'
+        }
         
         print("\n📊 Model Quality Assessment:")
         print("-" * 50)
