@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 def create_future_predictions_plot(y_test, future_predictions, test_mae, prediction_horizon,
-                                 save_path='results/plots/future_predictions.png'):
+                                 save_path='results/plots/lstm/future_predictions.png'):
     """Tworzy wykres predykcji przyszłości"""
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     

@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import os
 
-def create_data_exploration_plots(df, save_dir='results/plots/'):
+def create_data_exploration_plots(df, save_dir='results/plots/lstm'):
     """Tworzy wykresy eksploracji danych - każdy zapisywany osobno"""
     os.makedirs(save_dir, exist_ok=True)
     

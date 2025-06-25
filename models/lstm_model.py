@@ -259,7 +259,7 @@ class BitcoinLSTMModel:
         self.model.save(filepath)
         print(f"✅ Model zapisany do: {filepath}")
     
-    def plot_training_history(self, save_path='results/plots/training_history.png'):
+    def plot_training_history(self, save_path='results/plots/lstm/training_history.png'):
         """Tworzy wykres historii trenowania"""
         if self.history is None:
             print("Brak historii trenowania.")
@@ -293,7 +293,7 @@ class BitcoinLSTMModel:
         plt.show()
         print(f"Wykres historii trenowania zapisany do: {save_path}")
     
-    def save_training_curves(self, save_dir='results/plots/'):
+    def save_training_curves(self, save_dir='results/plots/lstm'):
         """Zapisuje krzywe uczenia - TYLKO JEDEN POŁĄCZONY WYKRES"""
         if self.history is None:
             print("Brak historii trenowania.")

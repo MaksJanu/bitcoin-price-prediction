@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import os
 
 def create_training_results_plots(history, y_test, y_test_pred, test_r2, 
-                                save_path='results/plots/lstm_training_results.png'):
+                                save_path='results/plots/lstm/lstm_training_results.png'):
     """Tworzy wykresy wyników treningu"""
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     

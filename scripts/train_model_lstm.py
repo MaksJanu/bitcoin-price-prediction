@@ -565,7 +565,7 @@ def main():
                 plt.tight_layout()
                 
                 # Zapisz wykres
-                save_path = 'results/plots/single_day_prediction.png'
+                save_path = 'results/plots/lstm/single_day_prediction.png'
                 os.makedirs(os.path.dirname(save_path), exist_ok=True)
                 plt.savefig(save_path, dpi=300, bbox_inches='tight')
                 plt.show()
