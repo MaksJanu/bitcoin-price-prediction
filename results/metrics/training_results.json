@@ -1,0 +1,38 @@
+{
+  "training_config": {
+    "sequence_length": 60,
+    "prediction_horizon": 1,
+    "epochs_requested": 100,
+    "epochs_actual": 100,
+    "batch_size": 16,
+    "patience": 30
+  },
+  "metrics": {
+    "train": {
+      "mse": 0.0038303890477816896,
+      "mae": 0.05461423470405563,
+      "r2": 0.8553755299213781
+    },
+    "test": {
+      "mse": 0.02070162774149975,
+      "mae": 0.12481673697812394,
+      "r2": 0.2939420810794735
+    }
+  },
+  "model_info": {
+    "input_shape": [
+      60,
+      7
+    ],
+    "features": [
+      "Open",
+      "High",
+      "Low",
+      "Volume",
+      "MA_7",
+      "MA_30",
+      "RSI"
+    ],
+    "target": "Price"
+  }
+}

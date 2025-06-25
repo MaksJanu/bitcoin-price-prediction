@@ -49,9 +49,19 @@ def main():
     print("🚀 Bitcoin Price Prediction using LSTM")
     print("="*50)
 
-    # Parametry
+    # Parametry treningu - zoptymalizowane dla dokładności
     SEQUENCE_LENGTH = 60
-    PREDICTION_HORIZON = 1  # Zacznij od 1 dnia
+    PREDICTION_HORIZON = 1
+    EPOCHS = 100  # Zwiększone dla lepszej dokładności
+    BATCH_SIZE = 16  # Zmniejszone dla stabilniejszego trenowania
+    PATIENCE = 30  # Zwiększone patience dla EarlyStopping
+    
+    print(f"🔧 Training Parameters:")
+    print(f"  Sequence Length: {SEQUENCE_LENGTH}")
+    print(f"  Prediction Horizon: {PREDICTION_HORIZON}")
+    print(f"  Max Epochs: {EPOCHS}")
+    print(f"  Batch Size: {BATCH_SIZE}")
+    print(f"  Early Stopping Patience: {PATIENCE}")
 
     # 1. Ładowanie i eksploracja danych
     print("\n📊 Step 1: Loading and exploring data...")
@@ -61,6 +71,13 @@ def main():
         print(f"Columns: {df.columns.tolist()}")
         print(f"Date range: {df['Date'].min()} to {df['Date'].max()}" if 'Date' in df.columns else "No Date column")
         
+        # Sprawdź jakość danych
+        missing_data = df.isnull().sum().sum()
+        print(f"Missing values: {missing_data}")
+        
+        if missing_data > 0:
+            print("⚠️ Warning: Missing data detected!")
+            
         # Drukuj statystyki danych
         if VISUALIZATION_AVAILABLE:
             print_data_statistics(df)
@@ -103,6 +120,16 @@ def main():
         print(f"✅ Data prepared successfully:")
         print(f"  Training set: X_train={X_train.shape}, y_train={y_train.shape}")
         print(f"  Test set: X_test={X_test.shape}, y_test={y_test.shape}")
+        print(f"  Total samples for training: {X_train.shape[0]}")
+        print(f"  Features per sample: {X_train.shape[2]}")
+        print(f"  Batches per epoch: {X_train.shape[0] // BATCH_SIZE}")
+        
+        # Sprawdź czy mamy wystarczająco danych
+        if X_train.shape[0] < 500:
+            print("⚠️ WARNING: Relatively small dataset! Consider:")
+            print("  - Using smaller batch size")
+            print("  - Reducing early stopping patience")
+            print("  - Adding data augmentation")
         
     except Exception as e:
         print(f"❌ Error preparing data: {e}")
@@ -130,19 +157,57 @@ def main():
     # 4. Trenowanie modelu
     print("\n🏃‍♂️ Step 4: Training LSTM model...")
     try:
-        print("Training started... This may take a few minutes.")
+        print("Training started... This may take several minutes.")
+        print(f"Requested epochs: {EPOCHS}")
+        print(f"Batch size: {BATCH_SIZE}")
+        print(f"Early stopping patience: {PATIENCE}")
         
-        # Zmniejsz liczbę epoch dla testów
-        history = model.train(X_train, y_train, epochs=50, batch_size=32, validation_split=0.2)
+        # Trenowanie z lepszymi parametrami
+        history = model.train(
+            X_train, y_train, 
+            epochs=EPOCHS, 
+            batch_size=BATCH_SIZE, 
+            validation_split=0.2,
+            patience=PATIENCE  # Przekaż patience do modelu
+        )
         
         print("✅ Training completed!")
         
-        # Sprawdź historię treningu
+        # ROZSZERZONA DIAGNOSTYKA TRENOWANIA
         if history and hasattr(history, 'history'):
+            actual_epochs = len(history.history['loss'])
             final_loss = history.history['loss'][-1]
             final_val_loss = history.history['val_loss'][-1]
-            print(f"Final training loss: {final_loss:.6f}")
-            print(f"Final validation loss: {final_val_loss:.6f}")
+            best_val_loss = min(history.history['val_loss'])
+            best_epoch = np.argmin(history.history['val_loss']) + 1
+            
+            print(f"\n🔍 Training Diagnostics:")
+            print(f"  Requested epochs: {EPOCHS}")
+            print(f"  Actually trained epochs: {actual_epochs}")
+            print(f"  Final training loss: {final_loss:.6f}")
+            print(f"  Final validation loss: {final_val_loss:.6f}")
+            print(f"  Best validation loss: {best_val_loss:.6f} (epoch {best_epoch})")
+            
+            # Sprawdź czy było early stopping
+            if actual_epochs < EPOCHS:
+                print(f"⚠️ Training stopped early after {actual_epochs} epochs!")
+                print("  This is due to EarlyStopping callback")
+                
+                # Pokaż trend validation loss w ostatnich epokach
+                if len(history.history['val_loss']) >= 10:
+                    recent_val_losses = history.history['val_loss'][-10:]
+                    print(f"  Last 10 validation losses:")
+                    for i, loss in enumerate(recent_val_losses):
+                        print(f"    Epoch {actual_epochs-9+i}: {loss:.6f}")
+            else:
+                print("✅ Training completed all epochs without early stopping")
+                
+            # Sprawdź overfit
+            loss_diff = final_val_loss - final_loss
+            if loss_diff > 0.01:
+                print(f"⚠️ Possible overfitting detected (val_loss - train_loss = {loss_diff:.6f})")
+            else:
+                print(f"✅ Good generalization (val_loss - train_loss = {loss_diff:.6f})")
         
     except Exception as e:
         print(f"❌ Error during training: {e}")
@@ -151,6 +216,7 @@ def main():
     # 5. Ewaluacja modelu
     print("\n📊 Step 5: Model evaluation...")
     try:
+        print("Making predictions...")
         y_train_pred = model.predict(X_train)
         y_test_pred = model.predict(X_test)
 
@@ -159,7 +225,7 @@ def main():
         test_metrics = calculate_metrics(y_test, y_test_pred)
 
         print("\n📈 Model Performance Metrics:")
-        print("-" * 40)
+        print("-" * 50)
         print(f"Training Set:")
         print(f"  MSE: {train_metrics['mse']:.6f}")
         print(f"  MAE: {train_metrics['mae']:.6f}")
@@ -168,6 +234,20 @@ def main():
         print(f"  MSE: {test_metrics['mse']:.6f}")
         print(f"  MAE: {test_metrics['mae']:.6f}")
         print(f"  R²:  {test_metrics['r2']:.6f}")
+        
+        # Dodatkowa analiza
+        test_r2 = test_metrics['r2']
+        if test_r2 > 0.8:
+            print("🎉 Excellent model performance!")
+        elif test_r2 > 0.6:
+            print("✅ Good model performance")
+        elif test_r2 > 0.4:
+            print("⚠️ Moderate model performance")
+        else:
+            print("❌ Poor model performance - consider:")
+            print("  - More training data")
+            print("  - Different model architecture")
+            print("  - Feature engineering")
         
     except Exception as e:
         print(f"❌ Error during evaluation: {e}")
@@ -207,6 +287,7 @@ def main():
         last_sequence = X_test[-1:] if len(X_test) > 0 else X_train[-1:]
         
         # Przewiduj przyszłe wartości
+        print("Generating future predictions...")
         future_predictions = predict_future(model, last_sequence, days_ahead=30)
         
         # Wykresy predykcji przyszłości
@@ -233,18 +314,56 @@ def main():
         quality_assessment = assess_model_quality(test_metrics, y_test, y_test_pred)
         
         print("\n📊 Model Quality Assessment:")
-        print("-" * 40)
+        print("-" * 50)
         for metric, value in quality_assessment.items():
             print(f"{metric}: {value}")
             
     except Exception as e:
         print(f"⚠️ Warning: Could not assess model quality: {e}")
 
+    # 9. Zapisanie modelu i wyników
+    print("\n💾 Step 9: Saving results...")
+    try:
+        # Zapisz model
+        model.save_model('saved_models/bitcoin_lstm_model_optimized.h5')
+        
+        # Zapisz metryki do pliku JSON
+        results = {
+            'training_config': {
+                'sequence_length': SEQUENCE_LENGTH,
+                'prediction_horizon': PREDICTION_HORIZON,
+                'epochs_requested': EPOCHS,
+                'epochs_actual': len(history.history['loss']) if history else 0,
+                'batch_size': BATCH_SIZE,
+                'patience': PATIENCE
+            },
+            'metrics': {
+                'train': train_metrics,
+                'test': test_metrics
+            },
+            'model_info': {
+                'input_shape': input_shape,
+                'features': feature_columns,
+                'target': target_column
+            }
+        }
+        
+        os.makedirs('results/metrics', exist_ok=True)
+        with open('results/metrics/training_results.json', 'w') as f:
+            json.dump(results, f, indent=2, default=str)
+        
+        print("✅ Model and results saved successfully!")
+        print(f"  Model: saved_models/bitcoin_lstm_model_optimized.h5")
+        print(f"  Metrics: results/metrics/training_results.json")
+        
+    except Exception as e:
+        print(f"⚠️ Warning: Could not save results: {e}")
+
     print("\n✅ Training and evaluation completed successfully!")
     print("🎉 Model is working correctly!")
     
     if VISUALIZATION_AVAILABLE:
-        print("📊 Check the 'plots' directory for generated visualizations!")
+        print("📊 Check the 'results/plots' directory for generated visualizations!")
 
 if __name__ == "__main__":
     main()

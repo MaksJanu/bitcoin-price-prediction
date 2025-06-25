@@ -1,0 +1,104 @@
+{
+  "input_shape": [
+    60,
+    7
+  ],
+  "layers": [
+    {
+      "layer_number": 0,
+      "name": "lstm",
+      "type": "LSTM",
+      "output_shape": "Unknown",
+      "units": 128,
+      "return_sequences": true,
+      "activation": "tanh"
+    },
+    {
+      "layer_number": 1,
+      "name": "batch_normalization",
+      "type": "BatchNormalization",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 2,
+      "name": "dropout",
+      "type": "Dropout",
+      "output_shape": "Unknown",
+      "dropout_rate": 0.3
+    },
+    {
+      "layer_number": 3,
+      "name": "lstm_1",
+      "type": "LSTM",
+      "output_shape": "Unknown",
+      "units": 64,
+      "return_sequences": true,
+      "activation": "tanh"
+    },
+    {
+      "layer_number": 4,
+      "name": "batch_normalization_1",
+      "type": "BatchNormalization",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 5,
+      "name": "dropout_1",
+      "type": "Dropout",
+      "output_shape": "Unknown",
+      "dropout_rate": 0.3
+    },
+    {
+      "layer_number": 6,
+      "name": "lstm_2",
+      "type": "LSTM",
+      "output_shape": "Unknown",
+      "units": 32,
+      "return_sequences": false,
+      "activation": "tanh"
+    },
+    {
+      "layer_number": 7,
+      "name": "batch_normalization_2",
+      "type": "BatchNormalization",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 8,
+      "name": "dropout_2",
+      "type": "Dropout",
+      "output_shape": "Unknown",
+      "dropout_rate": 0.3
+    },
+    {
+      "layer_number": 9,
+      "name": "dense",
+      "type": "Dense",
+      "output_shape": "Unknown",
+      "units": 32,
+      "activation": "relu"
+    },
+    {
+      "layer_number": 10,
+      "name": "dropout_3",
+      "type": "Dropout",
+      "output_shape": "Unknown",
+      "dropout_rate": 0.15
+    },
+    {
+      "layer_number": 11,
+      "name": "dense_1",
+      "type": "Dense",
+      "output_shape": "Unknown",
+      "units": 1,
+      "activation": "linear"
+    }
+  ],
+  "total_params": 133441,
+  "optimizer": "Adam",
+  "loss": "huber",
+  "metrics": [
+    "loss",
+    "compile_metrics"
+  ]
+}
