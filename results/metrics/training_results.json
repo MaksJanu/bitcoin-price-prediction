@@ -2,21 +2,21 @@
   "training_config": {
     "sequence_length": 60,
     "prediction_horizon": 1,
-    "epochs_requested": 30,
-    "epochs_actual": 30,
+    "epochs_requested": 100,
+    "epochs_actual": 100,
     "batch_size": 16,
-    "patience": 30
+    "patience": 15
   },
   "metrics": {
     "train": {
-      "mse": 0.001458046477065885,
-      "mae": 0.028005928011819392,
-      "r2": 0.9449483599537293
+      "mse": 0.0005861858504916882,
+      "mae": 0.01826573464218191,
+      "r2": 0.9778673087935953
     },
     "test": {
-      "mse": 0.017414132094314354,
-      "mae": 0.11457534767619584,
-      "r2": 0.4060667103161816
+      "mse": 0.0026256183181765595,
+      "mae": 0.041543740310763806,
+      "r2": 0.910449621220121
     }
   },
   "model_info": {
