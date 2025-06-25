@@ -280,6 +280,15 @@ def main():
     else:
         print("\n⚠️ Step 6: Skipping visualizations (modules not available)")
 
+    # 6b. Zapisz krzywe uczenia (NOWA FUNKCJONALNOŚĆ)
+    print("\n📈 Step 6b: Saving training curves...")
+    try:
+        print("Creating and saving training curves...")
+        model.save_training_curves()
+        print("✅ Training curves saved successfully!")
+    except Exception as e:
+        print(f"⚠️ Warning: Could not save training curves: {e}")
+
     # 7. Predykcje przyszłości
     print("\n🔮 Step 7: Future predictions...")
     try:
@@ -355,6 +364,7 @@ def main():
         print("✅ Model and results saved successfully!")
         print(f"  Model: saved_models/bitcoin_lstm_model_optimized.h5")
         print(f"  Metrics: results/metrics/training_results.json")
+        print(f"  Training curves: results/plots/training_*_curve.png")
         
     except Exception as e:
         print(f"⚠️ Warning: Could not save results: {e}")
@@ -364,6 +374,11 @@ def main():
     
     if VISUALIZATION_AVAILABLE:
         print("📊 Check the 'results/plots' directory for generated visualizations!")
+    
+    print("📈 Training curves saved as separate files:")
+    print("  - training_loss_curve.png")
+    print("  - training_mae_curve.png") 
+    print("  - training_curves_combined.png")
 
 if __name__ == "__main__":
     main()
