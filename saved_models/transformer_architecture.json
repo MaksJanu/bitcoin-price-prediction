@@ -1,0 +1,313 @@
+{
+  "input_shape": [
+    60,
+    7
+  ],
+  "layers": [
+    {
+      "layer_number": 0,
+      "name": "input_layer",
+      "type": "InputLayer",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 1,
+      "name": "batch_normalization",
+      "type": "BatchNormalization",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 2,
+      "name": "multi_head_attention",
+      "type": "MultiHeadAttention",
+      "output_shape": "Unknown",
+      "num_heads": 4,
+      "key_dim": 128
+    },
+    {
+      "layer_number": 3,
+      "name": "dropout_1",
+      "type": "Dropout",
+      "output_shape": "Unknown",
+      "dropout_rate": 0.1
+    },
+    {
+      "layer_number": 4,
+      "name": "layer_normalization",
+      "type": "LayerNormalization",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 5,
+      "name": "add",
+      "type": "Add",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 6,
+      "name": "dense",
+      "type": "Dense",
+      "output_shape": "Unknown",
+      "units": 14
+    },
+    {
+      "layer_number": 7,
+      "name": "batch_normalization_1",
+      "type": "BatchNormalization",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 8,
+      "name": "dropout_2",
+      "type": "Dropout",
+      "output_shape": "Unknown",
+      "dropout_rate": 0.13999999999999999
+    },
+    {
+      "layer_number": 9,
+      "name": "dense_1",
+      "type": "Dense",
+      "output_shape": "Unknown",
+      "units": 7
+    },
+    {
+      "layer_number": 10,
+      "name": "dropout_3",
+      "type": "Dropout",
+      "output_shape": "Unknown",
+      "dropout_rate": 0.1
+    },
+    {
+      "layer_number": 11,
+      "name": "layer_normalization_1",
+      "type": "LayerNormalization",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 12,
+      "name": "add_1",
+      "type": "Add",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 13,
+      "name": "multi_head_attention_1",
+      "type": "MultiHeadAttention",
+      "output_shape": "Unknown",
+      "num_heads": 4,
+      "key_dim": 128
+    },
+    {
+      "layer_number": 14,
+      "name": "dropout_5",
+      "type": "Dropout",
+      "output_shape": "Unknown",
+      "dropout_rate": 0.1
+    },
+    {
+      "layer_number": 15,
+      "name": "layer_normalization_2",
+      "type": "LayerNormalization",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 16,
+      "name": "add_2",
+      "type": "Add",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 17,
+      "name": "dense_2",
+      "type": "Dense",
+      "output_shape": "Unknown",
+      "units": 14
+    },
+    {
+      "layer_number": 18,
+      "name": "batch_normalization_2",
+      "type": "BatchNormalization",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 19,
+      "name": "dropout_6",
+      "type": "Dropout",
+      "output_shape": "Unknown",
+      "dropout_rate": 0.13999999999999999
+    },
+    {
+      "layer_number": 20,
+      "name": "dense_3",
+      "type": "Dense",
+      "output_shape": "Unknown",
+      "units": 7
+    },
+    {
+      "layer_number": 21,
+      "name": "dropout_7",
+      "type": "Dropout",
+      "output_shape": "Unknown",
+      "dropout_rate": 0.1
+    },
+    {
+      "layer_number": 22,
+      "name": "layer_normalization_3",
+      "type": "LayerNormalization",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 23,
+      "name": "add_3",
+      "type": "Add",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 24,
+      "name": "multi_head_attention_2",
+      "type": "MultiHeadAttention",
+      "output_shape": "Unknown",
+      "num_heads": 4,
+      "key_dim": 128
+    },
+    {
+      "layer_number": 25,
+      "name": "dropout_9",
+      "type": "Dropout",
+      "output_shape": "Unknown",
+      "dropout_rate": 0.1
+    },
+    {
+      "layer_number": 26,
+      "name": "layer_normalization_4",
+      "type": "LayerNormalization",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 27,
+      "name": "add_4",
+      "type": "Add",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 28,
+      "name": "dense_4",
+      "type": "Dense",
+      "output_shape": "Unknown",
+      "units": 14
+    },
+    {
+      "layer_number": 29,
+      "name": "batch_normalization_3",
+      "type": "BatchNormalization",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 30,
+      "name": "dropout_10",
+      "type": "Dropout",
+      "output_shape": "Unknown",
+      "dropout_rate": 0.13999999999999999
+    },
+    {
+      "layer_number": 31,
+      "name": "dense_5",
+      "type": "Dense",
+      "output_shape": "Unknown",
+      "units": 7
+    },
+    {
+      "layer_number": 32,
+      "name": "dropout_11",
+      "type": "Dropout",
+      "output_shape": "Unknown",
+      "dropout_rate": 0.1
+    },
+    {
+      "layer_number": 33,
+      "name": "layer_normalization_5",
+      "type": "LayerNormalization",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 34,
+      "name": "add_5",
+      "type": "Add",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 35,
+      "name": "global_average_pooling1d",
+      "type": "GlobalAveragePooling1D",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 36,
+      "name": "batch_normalization_4",
+      "type": "BatchNormalization",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 37,
+      "name": "dense_6",
+      "type": "Dense",
+      "output_shape": "Unknown",
+      "units": 64
+    },
+    {
+      "layer_number": 38,
+      "name": "batch_normalization_5",
+      "type": "BatchNormalization",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 39,
+      "name": "dropout_12",
+      "type": "Dropout",
+      "output_shape": "Unknown",
+      "dropout_rate": 0.3
+    },
+    {
+      "layer_number": 40,
+      "name": "dense_7",
+      "type": "Dense",
+      "output_shape": "Unknown",
+      "units": 32
+    },
+    {
+      "layer_number": 41,
+      "name": "batch_normalization_6",
+      "type": "BatchNormalization",
+      "output_shape": "Unknown"
+    },
+    {
+      "layer_number": 42,
+      "name": "dropout_13",
+      "type": "Dropout",
+      "output_shape": "Unknown",
+      "dropout_rate": 0.3
+    },
+    {
+      "layer_number": 43,
+      "name": "dense_8",
+      "type": "Dense",
+      "output_shape": "Unknown",
+      "units": 1
+    }
+  ],
+  "total_params": 55209,
+  "optimizer": "Adam",
+  "loss": "mse",
+  "metrics": [
+    "loss",
+    "compile_metrics"
+  ],
+  "model_type": "Stabilized Transformer",
+  "stabilization_features": [
+    "BatchNormalization layers",
+    "Reduced dropout rates",
+    "Gradient clipping",
+    "Conservative learning rate",
+    "Reduced model complexity"
+  ]
+}

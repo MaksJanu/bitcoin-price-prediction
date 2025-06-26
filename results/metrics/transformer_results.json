@@ -1,0 +1,38 @@
+{
+  "test_metrics": {
+    "mse": 0.003503655459666849,
+    "mae": 0.04722887347357526,
+    "rmse": 0.05919168404148381,
+    "r2": 0.8805029385439186
+  },
+  "train_metrics": {
+    "mse": 0.002314526457675826,
+    "mae": 0.03904299794458198,
+    "rmse": 0.048109525643845484,
+    "r2": 0.9126101400540046
+  },
+  "quality_assessment": {
+    "overall": "Excellent",
+    "r2_quality": "Excellent",
+    "r2_icon": "\u2705",
+    "mae_quality": "Good",
+    "mae_icon": "\u2705",
+    "r2_score": 0.8805029385439186,
+    "mae_score": 0.04722887347357526
+  },
+  "model_params": {
+    "sequence_length": 60,
+    "prediction_horizon": 1,
+    "epochs_requested": 30,
+    "epochs_actual": 30,
+    "batch_size": 32,
+    "model_type": "Stabilized Transformer",
+    "stabilization_features": [
+      "BatchNormalization",
+      "Reduced dropout rates",
+      "Gradient clipping",
+      "Conservative learning rate",
+      "Reduced model complexity"
+    ]
+  }
+}
