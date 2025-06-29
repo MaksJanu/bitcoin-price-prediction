@@ -109,7 +109,7 @@ class BitcoinTransformerModel:
         print("✅ Stabilny model Transformer został utworzony pomyślnie!")
         return self.model
     
-    def train(self, X_train, y_train, validation_split=0.2, epochs=30, 
+    def train(self, X_train, y_train, validation_split=0.2, epochs=100, 
               batch_size=32, patience=20, min_lr=1e-7):
         """
         Trenuje model z zoptymalizowanymi callbackami dla stabilności

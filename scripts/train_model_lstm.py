@@ -486,7 +486,7 @@ def main():
             print(f"🔧 Using alternative method with sequence shape: {input_sequence.shape}")
             
             # Pojedyncza predykcja
-            next_day_pred = model.predict(input_sequence, verbose=0)[0][0]
+            next_day_pred = model.predict(input_sequence)[0][0]
             last_actual = df_sorted[target_column].iloc[-1]
             
             change = abs(next_day_pred - last_actual)

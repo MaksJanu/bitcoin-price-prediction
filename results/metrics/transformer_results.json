@@ -1,30 +1,27 @@
 {
   "test_metrics": {
-    "mse": 0.003503655459666849,
-    "mae": 0.04722887347357526,
-    "rmse": 0.05919168404148381,
-    "r2": 0.8805029385439186
+    "mse": 0.007231444854376984,
+    "mae": 0.07164591874778409,
+    "rmse": 0.08503790245753351,
+    "r2": 0.7533614762845664
   },
   "train_metrics": {
-    "mse": 0.002314526457675826,
-    "mae": 0.03904299794458198,
-    "rmse": 0.048109525643845484,
-    "r2": 0.9126101400540046
+    "mse": 0.0015611532576620454,
+    "mae": 0.028558158222687164,
+    "rmse": 0.039511431986983786,
+    "r2": 0.9410553445656793
   },
   "quality_assessment": {
-    "overall": "Excellent",
-    "r2_quality": "Excellent",
-    "r2_icon": "\u2705",
+    "overall": "Very Good",
+    "r2_quality": "Good",
     "mae_quality": "Good",
-    "mae_icon": "\u2705",
-    "r2_score": 0.8805029385439186,
-    "mae_score": 0.04722887347357526
+    "overall_score": 0.7564889941070277
   },
   "model_params": {
     "sequence_length": 60,
     "prediction_horizon": 1,
-    "epochs_requested": 30,
-    "epochs_actual": 30,
+    "epochs_requested": 100,
+    "epochs_actual": 100,
     "batch_size": 32,
     "model_type": "Stabilized Transformer",
     "stabilization_features": [

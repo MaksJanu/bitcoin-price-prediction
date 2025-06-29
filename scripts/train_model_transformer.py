@@ -118,7 +118,7 @@ def main():
     # Parametry treningu - zoptymalizowane dla stabilności
     SEQUENCE_LENGTH = 60
     PREDICTION_HORIZON = 1
-    EPOCHS = 30
+    EPOCHS = 100
     BATCH_SIZE = 32
     PATIENCE = 20  # Zwiększone dla stabilności
     
