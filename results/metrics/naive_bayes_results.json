@@ -1,0 +1,65 @@
+{
+  "test_metrics": {
+    "accuracy": 0.7841269841269841,
+    "precision": 0.7479052823315118,
+    "recall": 0.7841269841269841,
+    "f1_score": 0.714949494949495,
+    "classification_report": {
+      "Spadek": {
+        "precision": 0.6,
+        "recall": 0.08571428571428572,
+        "f1-score": 0.15,
+        "support": 70.0
+      },
+      "Wzrost": {
+        "precision": 0.7901639344262295,
+        "recall": 0.9836734693877551,
+        "f1-score": 0.8763636363636363,
+        "support": 245.0
+      },
+      "accuracy": 0.7841269841269841,
+      "macro avg": {
+        "precision": 0.6950819672131148,
+        "recall": 0.5346938775510204,
+        "f1-score": 0.5131818181818182,
+        "support": 315.0
+      },
+      "weighted avg": {
+        "precision": 0.7479052823315118,
+        "recall": 0.7841269841269841,
+        "f1-score": 0.714949494949495,
+        "support": 315.0
+      }
+    }
+  },
+  "quality_assessment": {
+    "overall": "Good",
+    "accuracy_quality": "Good",
+    "f1_quality": "Good",
+    "overall_score": 0.7426204906204907
+  },
+  "training_history": {
+    "train_accuracy": 0.7693836978131213,
+    "val_accuracy": 0.6309523809523809,
+    "cv_scores": [
+      0.3465346534653465,
+      0.21890547263681592,
+      1.0,
+      1.0,
+      0.9154228855721394
+    ],
+    "cv_mean": 0.6961726023348603,
+    "cv_std": 0.34138642920405016,
+    "class_distribution": [
+      901,
+      105
+    ]
+  },
+  "model_params": {
+    "sequence_length": 60,
+    "prediction_horizon": 1,
+    "classification_type": "direction",
+    "var_smoothing": 1e-09,
+    "model_type": "Naive Bayes"
+  }
+}
