@@ -27,6 +27,7 @@ class BitcoinNaiveBayesModel:
         self.feature_names = None
         self.class_names = None
         self.training_history = {}
+        self.prepared_features_for_correlation = None  # Dodane do przechowywania cech
         
     def _safe_division(self, numerator, denominator, default_value=0.0):
         """Bezpieczne dzielenie z obsługą dzielenia przez zero"""
@@ -48,13 +49,16 @@ class BitcoinNaiveBayesModel:
         
         return features
         
-    def _prepare_features(self, X_sequences):
+    def _prepare_features(self, X_sequences, store_for_correlation=False):
         """Przekształca sekwencje 3D na cechy 2D dla Naive Bayes"""
         # Spłaszcz sekwencje do cech statystycznych
         n_samples, timesteps, n_features = X_sequences.shape
         
         features = []
         feature_names = []
+        
+        # Nazwy oryginalnych cech (zakładając standardowe kolumny)
+        original_feature_names = ['Open', 'High', 'Low', 'Volume', 'MA_7', 'MA_30', 'RSI'][:n_features]
         
         for sample in X_sequences:
             sample_features = []
@@ -81,7 +85,12 @@ class BitcoinNaiveBayesModel:
                     sample_features.extend([mean_val, std_val, min_val, max_val, median_val])
                 
                 if len(feature_names) < n_features * 5:
-                    base_name = f"feature_{feature_idx}"
+                    # Użyj czytelnych nazw cech
+                    if feature_idx < len(original_feature_names):
+                        base_name = original_feature_names[feature_idx]
+                    else:
+                        base_name = f"Feature_{feature_idx}"
+                    
                     feature_names.extend([
                         f"{base_name}_mean",
                         f"{base_name}_std", 
@@ -119,9 +128,9 @@ class BitcoinNaiveBayesModel:
             
             if len(feature_names) == n_features * 5:
                 feature_names.extend([
-                    "price_change_mean",
-                    "price_change_std", 
-                    "total_price_change_pct"
+                    "Price_change_mean",
+                    "Price_change_std", 
+                    "Total_price_change_pct"
                 ])
             
             features.append(sample_features)
@@ -132,7 +141,25 @@ class BitcoinNaiveBayesModel:
         # Finalne czyszczenie cech
         features_array = self._clean_features(features_array)
         
+        # Zapisz cechy do analizy korelacji jeśli potrzeba
+        if store_for_correlation:
+            self.prepared_features_for_correlation = features_array
+        
         return features_array
+    
+    def get_feature_correlation_matrix(self):
+        """Zwraca macierz korelacji przetwo rzonych cech"""
+        if self.prepared_features_for_correlation is None:
+            print("Brak przygotowanych cech. Uruchom najpierw trenowanie.")
+            return None
+        
+        # Stwórz DataFrame z przetworzonymi cechami
+        df_features = pd.DataFrame(
+            self.prepared_features_for_correlation, 
+            columns=self.feature_names
+        )
+        
+        return df_features.corr()
     
     def _create_labels(self, y_true, X_sequences):
         """Tworzy etykiety klasyfikacyjne z wartości rzeczywistych"""
@@ -190,7 +217,8 @@ class BitcoinNaiveBayesModel:
             raise ValueError("Model nie został utworzony. Użyj create_model() najpierw.")
         
         print("🔧 Przygotowywanie cech...")
-        X_features = self._prepare_features(X_train)
+        # Zapisz cechy do analizy korelacji
+        X_features = self._prepare_features(X_train, store_for_correlation=True)
         y_labels = self._create_labels(y_train, X_train)
         
         print(f"📊 Kształt cech: {X_features.shape}")

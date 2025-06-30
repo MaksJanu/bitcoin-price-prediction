@@ -39,7 +39,10 @@ except ImportError as e:
 VISUALIZATION_AVAILABLE = True
 try:
     from visualization.naive_bayes_results import create_naive_bayes_results_plots
-    from visualization.data_exploration import create_data_exploration_plots
+    from visualization.naive_bayes_data_exploration import (
+        create_naive_bayes_data_exploration_plots, 
+        print_feature_analysis_summary
+    )
     print("✅ visualization modules imported successfully")
 except ImportError as e:
     print(f"⚠️ Warning: visualization modules not available: {e}")
@@ -68,12 +71,6 @@ def main():
         print(f"✅ Data loaded successfully: {df.shape}")
         print(f"Date range: {df['Date'].min()} to {df['Date'].max()}")
         print(f"Columns: {df.columns.tolist()}")
-        
-        # Opcjonalne: wizualizacja danych
-        if VISUALIZATION_AVAILABLE:
-            print("Creating data exploration plots...")
-            create_data_exploration_plots(df, save_dir='results/plots/naive_bayes')
-            print("✅ Data exploration plots created!")
         
     except Exception as e:
         print(f"❌ Error loading data: {e}")
@@ -225,6 +222,12 @@ def main():
                 save_path='results/plots/naive_bayes/naive_bayes_results.png'
             )
             
+            print("Creating Naive Bayes data exploration plots...")
+            create_naive_bayes_data_exploration_plots(model)
+            
+            print("Printing feature analysis summary...")
+            print_feature_analysis_summary(model)
+            
             print("✅ Visualizations created successfully!")
             
         except Exception as e:
@@ -238,6 +241,7 @@ def main():
         print("Creating and saving training curves...")
         model.save_training_curves()
         print("✅ Training curves saved successfully!")
+        
     except Exception as e:
         print(f"⚠️ Warning: Could not save training curves: {e}")
 
@@ -283,6 +287,64 @@ def main():
         for i, (class_name, prob) in enumerate(zip(model.class_names, next_day_probabilities)):
             print(f"  {class_name}: {prob:.2%}")
         
+        # NOWA SEKCJA: Oszacowanie przewidywanej ceny
+        print(f"\n💰 ESTIMATED PRICE PREDICTION:")
+        print("=" * 50)
+        
+        # Pobierz ostatnią znaną cenę
+        last_price_normalized = df_sorted[target_column].iloc[-1]
+        
+        if scaler is not None:
+            try:
+                # Denormalizuj ostatnią cenę
+                dummy_data = np.zeros((1, len(scaler.feature_names_in_)))
+                price_idx = list(scaler.feature_names_in_).index(target_column)
+                dummy_data[0, price_idx] = last_price_normalized
+                last_price_actual = scaler.inverse_transform(dummy_data)[0, price_idx]
+                
+                # Oszacuj zmianę ceny na podstawie kierunku i pewności
+                if predicted_class == 'Wzrost':
+                    # Dla wzrostu: używamy pewności do oszacowania siły wzrostu
+                    estimated_change_pct = confidence * 0.05  # Maksymalnie 5% wzrostu przy 100% pewności
+                    estimated_next_price = last_price_actual * (1 + estimated_change_pct)
+                    trend_symbol = "📈"
+                    trend_text = "BULLISH"
+                else:  # Spadek
+                    # Dla spadku: używamy pewności do oszacowania siły spadku
+                    estimated_change_pct = -confidence * 0.05  # Maksymalnie 5% spadku przy 100% pewności
+                    estimated_next_price = last_price_actual * (1 + estimated_change_pct)
+                    trend_symbol = "📉"
+                    trend_text = "BEARISH"
+                
+                estimated_change_dollar = estimated_next_price - last_price_actual
+                
+                print(f"📊 Current Bitcoin Price: ${last_price_actual:,.2f}")
+                print(f"🚀 Estimated Next Day Price: ${estimated_next_price:,.2f}")
+                print(f"📈 Estimated Change: ${estimated_change_dollar:+,.2f} ({estimated_change_pct*100:+.2f}%)")
+                print(f"{trend_symbol} Trend: {trend_text}")
+                
+                # Dodatkowa analiza na podstawie pewności
+                if confidence > 0.8:
+                    strength = "STRONG"
+                    reliability = "High reliability"
+                elif confidence > 0.6:
+                    strength = "MODERATE"
+                    reliability = "Medium reliability"
+                else:
+                    strength = "WEAK"
+                    reliability = "Low reliability"
+                
+                print(f"💪 Signal Strength: {strength} ({reliability})")
+                
+            except Exception as denorm_error:
+                print(f"⚠️ Could not denormalize prices: {denorm_error}")
+                print(f"📊 Current Price (normalized): {last_price_normalized:.6f}")
+                print(f"🚀 Predicted Direction: {predicted_class} (confidence: {confidence:.2%})")
+        else:
+            print(f"📊 Current Price (normalized): {last_price_normalized:.6f}")
+            print(f"🚀 Predicted Direction: {predicted_class} (confidence: {confidence:.2%})")
+            print("⚠️ Cannot estimate actual price without scaler")
+        
         # Dodatkowe informacje o pewności predykcji
         print(f"\n🔍 Prediction Details:")
         print(f"  Model Accuracy: {test_accuracy:.4f}")
@@ -300,7 +362,7 @@ def main():
         else:
             print("  💡 Strategy: Low confidence - consider additional analysis")
             
-        print(f"  ⚠️ Disclaimer: This is a directional prediction, not financial advice!")
+        print(f"  ⚠️ Disclaimer: This is an estimated prediction based on direction and confidence, not financial advice!")
         
     except Exception as e:
         print(f"❌ Error in next day prediction: {e}")
