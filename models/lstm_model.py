@@ -12,25 +12,11 @@ from tensorflow.keras.metrics import MeanAbsoluteError
 
 class BitcoinLSTMModel:
     def __init__(self, input_shape):
-        """
-        Inicjalizuje model LSTM dla predykcji cen Bitcoin
-        
-        Args:
-            input_shape (tuple): Kształt danych wejściowych (timesteps, features)
-        """
         self.input_shape = input_shape
         self.model = None
         self.history = None
         
     def create_model(self, lstm_units=[128, 64, 32], dropout_rate=0.3, learning_rate=0.001):
-        """
-        Tworzy zoptymalizowaną architekturę modelu LSTM
-        
-        Args:
-            lstm_units (list): Lista liczb neuronów w warstwach LSTM
-            dropout_rate (float): Współczynnik dropout
-            learning_rate (float): Learning rate dla optimizera
-        """
         self.model = Sequential()
         
         # Pierwsza warstwa LSTM z BatchNormalization
@@ -78,18 +64,6 @@ class BitcoinLSTMModel:
     
     def train(self, X_train, y_train, validation_split=0.2, epochs=100, 
               batch_size=16, patience=15, min_lr=1e-6):
-        """
-        Trenuje model z zoptymalizowanymi callbackami
-        
-        Args:
-            X_train: Dane treningowe
-            y_train: Etykiety treningowe
-            validation_split: Udział danych walidacyjnych
-            epochs: Maksymalna liczba epok
-            batch_size: Rozmiar batcha
-            patience: Patience dla EarlyStopping
-            min_lr: Minimalny learning rate
-        """
         if self.model is None:
             raise ValueError("Model nie został utworzony. Użyj create_model() najpierw.")
         
@@ -144,13 +118,11 @@ class BitcoinLSTMModel:
         return self.history
     
     def predict(self, X):
-        """Wykonuje predykcję"""
         if self.model is None:
             raise ValueError("Model nie został utworzony lub nie został wytrenowany.")
         return self.model.predict(X, verbose=0)
     
     def get_model_summary(self):
-        """Wyświetla podsumowanie modelu"""
         if self.model is None:
             raise ValueError("Model nie został utworzony.")
         
@@ -173,7 +145,6 @@ class BitcoinLSTMModel:
         return total_params
     
     def save_model_architecture(self, filepath='saved_models/model_architecture.json'):
-        """Zapisuje architekturę modelu do pliku JSON - POPRAWIONA WERSJA"""
         if self.model is None:
             raise ValueError("Model nie został utworzony.")
         
@@ -194,7 +165,7 @@ class BitcoinLSTMModel:
                 'metrics': getattr(self.model, 'metrics_names', [])
             }
             
-            # Szczegóły warstw - BEZPIECZNE podejście
+            # Szczegóły warstw 
             for i, layer in enumerate(self.model.layers):
                 layer_info = {
                     'layer_number': i,
@@ -251,7 +222,6 @@ class BitcoinLSTMModel:
             print(f"✅ Podstawowe informacje o architekturze zapisane do: {filepath}")
     
     def save_model(self, filepath='saved_models/bitcoin_lstm_model.h5'):
-        """Zapisuje cały model"""
         if self.model is None:
             raise ValueError("Model nie został utworzony.")
         
@@ -260,7 +230,6 @@ class BitcoinLSTMModel:
         print(f"✅ Model zapisany do: {filepath}")
     
     def plot_training_history(self, save_path='results/plots/lstm/training_history.png'):
-        """Tworzy wykres historii trenowania"""
         if self.history is None:
             print("Brak historii trenowania.")
             return
@@ -294,7 +263,6 @@ class BitcoinLSTMModel:
         print(f"Wykres historii trenowania zapisany do: {save_path}")
     
     def save_training_curves(self, save_dir='results/plots/lstm'):
-        """Zapisuje krzywe uczenia - TYLKO JEDEN POŁĄCZONY WYKRES"""
         if self.history is None:
             print("Brak historii trenowania.")
             return

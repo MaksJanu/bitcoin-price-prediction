@@ -16,18 +16,11 @@ import json
 
 class BitcoinTransformerModel:
     def __init__(self, input_shape):
-        """
-        Inicjalizuje model Transformer dla predykcji cen Bitcoin
-        
-        Args:
-            input_shape (tuple): Kształt danych wejściowych (timesteps, features)
-        """
         self.input_shape = input_shape
         self.model = None
         self.history = None
     
     def create_transformer_block(self, inputs, head_size, num_heads, ff_dim, dropout=0):
-        """Tworzy stabilny blok Transformer z BatchNormalization"""
         # Multi-head self-attention z batch normalization
         attention_output = MultiHeadAttention(
             key_dim=head_size, 
@@ -55,19 +48,6 @@ class BitcoinTransformerModel:
     
     def create_model(self, head_size=128, num_heads=4, ff_dim=2, num_transformer_blocks=3,
                      mlp_units=[64, 32], dropout=0.2, mlp_dropout=0.3, learning_rate=0.0005):
-        """
-        Tworzy stabilną architekturę modelu Transformer
-        
-        Args:
-            head_size (int): Rozmiar głowy attention (zmniejszony)
-            num_heads (int): Liczba głów attention 
-            ff_dim (int): Rozmiar warstwy feed-forward (zmniejszony)
-            num_transformer_blocks (int): Liczba bloków transformer (zmniejszona)
-            mlp_units (list): Lista liczb neuronów w warstwach MLP (zmniejszone)
-            dropout (float): Współczynnik dropout w transformer (zmniejszony)
-            mlp_dropout (float): Współczynnik dropout w MLP
-            learning_rate (float): Learning rate dla optimizera (zmniejszony)
-        """
         inputs = Input(shape=self.input_shape)
         x = inputs
         
@@ -111,9 +91,6 @@ class BitcoinTransformerModel:
     
     def train(self, X_train, y_train, validation_split=0.2, epochs=100, 
               batch_size=32, patience=20, min_lr=1e-7):
-        """
-        Trenuje model z zoptymalizowanymi callbackami dla stabilności
-        """
         if self.model is None:
             raise ValueError("Model nie został utworzony. Użyj create_model() najpierw.")
         
@@ -169,13 +146,11 @@ class BitcoinTransformerModel:
         return self.history
     
     def predict(self, X):
-        """Wykonuje predykcję"""
         if self.model is None:
             raise ValueError("Model nie został utworzony lub nie został wytrenowany.")
         return self.model.predict(X, verbose=0)
     
     def get_model_summary(self):
-        """Wyświetla podsumowanie modelu"""
         if self.model is None:
             raise ValueError("Model nie został utworzony.")
         
@@ -197,7 +172,6 @@ class BitcoinTransformerModel:
         return total_params
     
     def save_model_architecture(self, filepath='saved_models/transformer_architecture.json'):
-        """Zapisuje architekturę modelu do pliku JSON"""
         if self.model is None:
             raise ValueError("Model nie został utworzony.")
         
@@ -279,7 +253,6 @@ class BitcoinTransformerModel:
             print(f"✅ Podstawowe informacje o architekturze zapisane do: {filepath}")
     
     def save_model(self, filepath='saved_models/bitcoin_transformer_model.h5'):
-        """Zapisuje cały model"""
         if self.model is None:
             raise ValueError("Model nie został utworzony.")
         
@@ -288,7 +261,6 @@ class BitcoinTransformerModel:
         print(f"✅ Stabilny model zapisany do: {filepath}")
     
     def save_training_curves(self, save_dir='results/plots/transformer'):
-        """Zapisuje krzywe uczenia - JEDEN POŁĄCZONY WYKRES"""
         if self.history is None:
             print("Brak historii trenowania.")
             return

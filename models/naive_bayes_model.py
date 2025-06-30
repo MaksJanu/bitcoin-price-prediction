@@ -12,13 +12,6 @@ import seaborn as sns
 
 class BitcoinNaiveBayesModel:
     def __init__(self, input_shape, classification_type='direction'):
-        """
-        Inicjalizuje model Naive Bayes dla przewidywania Bitcoina
-        
-        Args:
-            input_shape (tuple): Kształt danych wejściowych (timesteps, features)
-            classification_type (str): 'direction' (wzrost/spadek) lub 'range' (zakresy cenowe)
-        """
         self.input_shape = input_shape
         self.classification_type = classification_type
         self.model = None
@@ -30,14 +23,12 @@ class BitcoinNaiveBayesModel:
         self.prepared_features_for_correlation = None  # Dodane do przechowywania cech
         
     def _safe_division(self, numerator, denominator, default_value=0.0):
-        """Bezpieczne dzielenie z obsługą dzielenia przez zero"""
         with np.errstate(divide='ignore', invalid='ignore'):
             result = np.divide(numerator, denominator)
             result = np.where(np.isfinite(result), result, default_value)
             return result
     
     def _clean_features(self, features):
-        """Czyści cechy z wartości problematycznych"""
         # Zamień inf i -inf na NaN
         features = np.where(np.isinf(features), np.nan, features)
         
@@ -50,7 +41,6 @@ class BitcoinNaiveBayesModel:
         return features
         
     def _prepare_features(self, X_sequences, store_for_correlation=False):
-        """Przekształca sekwencje 3D na cechy 2D dla Naive Bayes"""
         # Spłaszcz sekwencje do cech statystycznych
         n_samples, timesteps, n_features = X_sequences.shape
         
@@ -162,7 +152,6 @@ class BitcoinNaiveBayesModel:
         return df_features.corr()
     
     def _create_labels(self, y_true, X_sequences):
-        """Tworzy etykiety klasyfikacyjne z wartości rzeczywistych"""
         if self.classification_type == 'direction':
             # Przewiduj kierunek zmiany (wzrost/spadek)
             last_prices = X_sequences[:, -1, -1]  # ostatnia cena w sekwencji
@@ -194,25 +183,11 @@ class BitcoinNaiveBayesModel:
         return labels.astype(int)
     
     def create_model(self, var_smoothing=1e-9):
-        """
-        Tworzy model Gaussian Naive Bayes
-        
-        Args:
-            var_smoothing (float): Wygładzanie wariancji
-        """
         self.model = GaussianNB(var_smoothing=var_smoothing)
         print("✅ Model Naive Bayes został utworzony pomyślnie!")
         return self.model
     
     def train(self, X_train, y_train, validation_split=0.2):
-        """
-        Trenuje model Naive Bayes
-        
-        Args:
-            X_train: Dane treningowe (sekwencje)
-            y_train: Etykiety treningowe (ceny)
-            validation_split: Udział danych walidacyjnych
-        """
         if self.model is None:
             raise ValueError("Model nie został utworzony. Użyj create_model() najpierw.")
         

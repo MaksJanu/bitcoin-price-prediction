@@ -3,7 +3,6 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
 
 def calculate_metrics(y_true, y_pred):
-    """Oblicza metryki ewaluacji modelu dla regresji (LSTM, Transformer)"""
     # Spłaszcz predykcje jeśli potrzeba
     if len(y_pred.shape) > 1:
         y_pred = y_pred.flatten()
@@ -23,7 +22,6 @@ def calculate_metrics(y_true, y_pred):
     }
 
 def calculate_classification_metrics(y_true, y_pred, class_names=None):
-    """Oblicza metryki ewaluacji modelu dla klasyfikacji (Naive Bayes)"""
     accuracy = accuracy_score(y_true, y_pred)
     precision = precision_score(y_true, y_pred, average='weighted')
     recall = recall_score(y_true, y_pred, average='weighted')
@@ -45,17 +43,6 @@ def calculate_classification_metrics(y_true, y_pred, class_names=None):
     }
 
 def predict_future(model, last_sequence, days_ahead=7):
-    """
-    Przewiduje przyszłe wartości używając wytrenowanego modelu regresji
-    
-    Args:
-        model: Wytrenowany model (LSTM lub Transformer)
-        last_sequence: Ostatnia sekwencja danych
-        days_ahead: Liczba dni do przewidzenia w przyszłość
-    
-    Returns:
-        array: Przewidywane wartości na kolejne dni
-    """
     predictions = []
     current_sequence = last_sequence.copy()
     
@@ -71,7 +58,6 @@ def predict_future(model, last_sequence, days_ahead=7):
     return np.array(predictions)
 
 def assess_model_quality(r2_score, mae_score):
-    """Ocenia jakość modelu regresji na podstawie R² i MAE"""
     
     # Ocena R²
     if r2_score >= 0.9:
@@ -131,7 +117,6 @@ def assess_model_quality(r2_score, mae_score):
     }
 
 def assess_model_quality_simple(r2_score):
-    """Ocenia jakość modelu na podstawie R² - wersja dla LSTM"""
     if r2_score > 0.8:
         return "Excellent performance (R² > 0.8)", "✅"
     elif r2_score > 0.6:
@@ -142,7 +127,6 @@ def assess_model_quality_simple(r2_score):
         return "Poor performance (R² < 0.4)", "❌"
 
 def assess_naive_bayes_quality(accuracy, f1_score):
-    """Ocenia jakość modelu Naive Bayes na podstawie dokładności i F1-score"""
     
     # Ocena dokładności
     if accuracy >= 0.9:
@@ -199,17 +183,6 @@ def assess_naive_bayes_quality(accuracy, f1_score):
     }
 
 def predict_price_direction_with_naive_bayes(model, last_sequence, scaler=None):
-    """
-    Przewiduje kierunek zmiany ceny używając modelu Naive Bayes
-    
-    Args:
-        model: Wytrenowany model BitcoinNaiveBayesModel
-        last_sequence: Ostatnia sekwencja danych (60 dni)
-        scaler: Scaler do denormalizacji (opcjonalnie)
-    
-    Returns:
-        dict: Słownik z predykcją kierunku i prawdopodobieństwami
-    """
     try:
         # Reshape dla pojedynczej predykcji
         X_pred = last_sequence.reshape(1, *last_sequence.shape)
@@ -238,16 +211,7 @@ def predict_price_direction_with_naive_bayes(model, last_sequence, scaler=None):
         return None
 
 def get_model_recommendations(model_type, performance_metrics):
-    """
-    Zwraca rekomendacje dla modelu na podstawie jego wydajności
-    
-    Args:
-        model_type: Typ modelu ('lstm', 'transformer', 'naive_bayes')
-        performance_metrics: Słownik z metrykami wydajności
-    
-    Returns:
-        dict: Słownik z rekomendacjami
-    """
+
     recommendations = {
         'trading_strategy': '',
         'confidence_level': '',
@@ -324,12 +288,7 @@ def get_model_recommendations(model_type, performance_metrics):
     return recommendations
 
 def compare_models_performance(lstm_metrics=None, transformer_metrics=None, naive_bayes_metrics=None):
-    """
-    Porównuje wydajność różnych modeli
-    
-    Returns:
-        dict: Słownik z wynikami porównania
-    """
+
     comparison = {
         'best_regression_model': None,
         'best_classification_model': None,
@@ -377,7 +336,7 @@ def compare_models_performance(lstm_metrics=None, transformer_metrics=None, naiv
 
 # Funkcje pomocnicze do kompatybilności wstecznej
 def create_performance_summary(metrics, model_type):
-    """Tworzy podsumowanie wydajności modelu"""
+
     if model_type.lower() in ['lstm', 'transformer']:
         quality = assess_model_quality(metrics.get('r2', 0), metrics.get('mae', 1))
         return {
